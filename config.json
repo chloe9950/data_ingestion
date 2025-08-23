@@ -1,0 +1,91 @@
+{
+  "pipeline": {
+    "name": "edge_draft_pipeline",
+    "description": "Edge Draft Apps data ingestion pipeline"
+  },
+  "source": {
+    "storage_account": "your_storage_account_name",
+    "container": "your_container_name",
+    "path": "path/to/edge/files/",
+    "file_pattern": "*EDGE Reporting - Edge Draft Apps Manual Update*",
+    "file_extension": ".csv"
+  },
+  "schema": {
+    "columns": [
+      {"name": "date_submitted", "type": "string"},
+      {"name": "account_name", "type": "string"},
+      {"name": "account_type", "type": "string"},
+      {"name": "practice", "type": "string"},
+      {"name": "adviser", "type": "string"}
+    ],
+    "derived_columns": [
+      {"name": "source_filename", "type": "string"},
+      {"name": "ingestion_datetime", "type": "timestamp"},
+      {"name": "download_date", "type": "date"}
+    ]
+  },
+  "destinations": {
+    "bronze_table": {
+      "catalog": "your_catalog",
+      "schema": "bronze",
+      "table": "bronze_edge_draft"
+    },
+    "silver_table": {
+      "catalog": "your_catalog",
+      "schema": "silver",
+      "table": "silver_edge_draft"
+    },
+    "log_table": {
+      "catalog": "your_catalog",
+      "schema": "logs",
+      "table": "ingestion_logs"
+    },
+    "organization_table": {
+      "catalog": "your_catalog",
+      "schema": "bronze",
+      "table": "organization"
+    },
+    "dynamic_mapping_table": {
+      "catalog": "your_catalog",
+      "schema": "bronze",
+      "table": "dynamic_mapping"
+    }
+  },
+  "timezone": {
+    "source": "UTC",
+    "target": "Australia/Sydney"
+  },
+  "processing": {
+    "date_formats": [
+      "d/MM/yyyy HH:mm",
+      "dd/MM/yyyy HH:mm"
+    ],
+    "filename_date_pattern": "\\((\\d{1,2})_(\\d{1,2})_(\\d{4})\\)",
+    "deduplication_columns": ["date_submitted", "account_name", "practice", "adviser"],
+    "batch_size": 1000000,
+    "cache_enabled": true
+  },
+  "organization_matching": {
+    "company_name_column": "companyname",
+    "advisor_name_column": "advisorname",
+    "load_date_column": "load_date",
+    "adviser_code_column": "adviser_code",
+    "name_cleaning_patterns": [
+      " --inactive",
+      " - inactive",
+      "\\s*--\\s*.*$",
+      "\\s*-\\s*.*inactive.*$"
+    ]
+  },
+  "dynamic_mapping": {
+    "adviser_code_column": "adviser_code",
+    "dynamic_id_column": "dynamic_id"
+  },
+  "optimization": {
+    "delta_optimize_frequency_hours": 24,
+    "vacuum_retention_hours": 168,
+    "z_order_columns": ["download_date", "practice"],
+    "auto_optimize": true,
+    "adaptive_query_execution": true
+  }
+}
