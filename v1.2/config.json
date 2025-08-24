@@ -1,0 +1,43 @@
+{
+  "pipeline": {
+    "name": "edge_draft_pipeline",
+    "description": "Edge Draft Apps data ingestion pipeline"
+  },
+  "source": {
+    "storage_account": "your_storage_account",
+    "container": "your_container",
+    "path": "edge_reports/",
+    "file_pattern": "*EDGE Reporting - Edge Draft Apps Manual Update*",
+    "file_format": "csv"
+  },
+  "target": {
+    "catalog": "your_catalog",
+    "schema": "your_schema",
+    "bronze_table": "bronze_edge_draft",
+    "silver_table": "silver_edge_draft",
+    "log_table": "ingestion_logs"
+  },
+  "schema": {
+    "date_submitted": "timestamp",
+    "account_name": "string",
+    "account_type": "string", 
+    "practice": "string",
+    "adviser": "string",
+    "source_filename": "string",
+    "ingestion_datetime": "timestamp",
+    "download_date": "date"
+  },
+  "timezone": {
+    "source": "UTC",
+    "target": "Australia/Sydney"
+  },
+  "processing": {
+    "mode": "incremental",
+    "deduplication_columns": ["download_date", "account_name", "practice", "adviser"],
+    "partition_column": "download_date"
+  },
+  "reference_tables": {
+    "organization_table": "organization",
+    "dynamic_mapping_table": "dynamic_mapping"
+  }
+}

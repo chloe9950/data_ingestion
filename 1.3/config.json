@@ -1,0 +1,38 @@
+{
+  "pipeline_config": {
+    "source": {
+      "storage_account": "your_storage_account",
+      "container": "your_container",
+      "folder_path": "path/to/files/",
+      "file_pattern": "*.csv",
+      "filename_regex": "^.*\\((\\d{1,2})_(\\d{1,2})_(\\d{4})\\)\\.csv$"
+    },
+    "destinations": {
+      "bronze_table": "main.bronze_schema.bronze_edge_draft",
+      "silver_table": "main.silver_schema.silver_edge_draft",
+      "log_table": "main.logs_schema.ingestion_logs"
+    },
+    "schema": {
+      "date_submitted": "timestamp",
+      "account_name": "string",
+      "account_type": "string", 
+      "practice": "string",
+      "adviser": "string",
+      "source_filename": "string",
+      "ingestion_datetime": "timestamp",
+      "download_date": "date"
+    },
+    "timezone": {
+      "source": "UTC",
+      "target": "Australia/Sydney"
+    },
+    "processing": {
+      "full_refresh": false,
+      "enable_schema_validation": true,
+      "max_files_per_run": 100
+    },
+    "reference_tables": {
+      "organization_table": "main.reference_schema.organization"
+    }
+  }
+}
